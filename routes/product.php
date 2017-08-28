@@ -1,0 +1,89 @@
+<?php
+function _formatProduct($raw_product) {
+  $product = wc_get_product($raw_product);
+
+  return (object) [
+    'ID' => $raw_product->ID,
+    'name' => $product->get_name(),
+    'status' => $product->get_status(),
+    'description' => $product->get_description(),
+    'short_description' => $product->get_short_description(),
+    'price' => $product->get_price(),
+    'image' => get_the_post_thumbnail_url($raw_product->ID),
+  ];
+}
+
+function searchProduct($request) {
+  $args = array(
+    'post_type' => 'product',
+    's' => $request['starts_with'],
+    'status' => 'publish',
+    'posts_per_page' => $request['limit'],
+    'offset' => ( $request['page'] - 1 ) * $request['limit'],
+  );
+
+  add_filter( 'posts_search', 'search_by_title', 20, 2 );
+  $query = new WP_Query($args);
+  $products = array_map('_formatProduct', $query->posts);
+
+  $result = (object) [
+    'query' => $request->get_query_params(),
+    'count' => $query->found_posts,
+    'rows'  => $products,
+  ];
+
+  return $result;
+}
+
+function search_by_title($search, $wp_query){
+
+    global $wpdb;
+
+    if(empty($search))
+        return $search;
+
+    $q = $wp_query->query_vars;
+    $n = !empty($q['exact']) ? '' : '%';
+
+    $search = $searchand = '';
+
+    foreach((array)$q['search_terms'] as $term) :
+
+        $term = esc_sql(like_escape($term));
+
+        $search.= "{$searchand}($wpdb->posts.post_title REGEXP '[[:<:]]{$term}')";
+
+        $searchand = ' AND ';
+
+    endforeach;
+
+    if(!empty($search)) :
+        $search = " AND ({$search}) ";
+    endif;
+
+    return $search;
+
+}
+
+function add_product_api() {
+  register_rest_route('dogfood/v1', '/product', array(
+    'methods' => WP_REST_Server::READABLE,
+    'callback' => 'searchProduct',
+    'args' => array(
+      'page' => array(
+        'default' => 1,
+        'type' => 'integer',
+        'sanitize_callback' => 'absint',
+      ),
+      'limit' => array(
+        'default' => 10,
+        'type' => 'integer',
+        'sanitize_callback' => 'absint',
+      ),
+      'starts_with' => array(
+        'default' => '',
+        'type' => 'string',
+      )
+    )
+  ));
+}
