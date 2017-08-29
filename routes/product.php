@@ -1,4 +1,5 @@
 <?php
+
 function _formatProduct($raw_product) {
   $product = wc_get_product($raw_product);
 
@@ -65,8 +66,22 @@ function search_by_title($search, $wp_query){
 
 }
 
-function add_product_api() {
-  register_rest_route('dogfood/v1', '/product', array(
+function getProductById($request) {
+  $args = array(
+    'post_type' => 'product',
+    'status' => 'publish',
+    'p' => $request['pid'],
+  );
+
+  $query_result = new WP_Query($args);
+  $query_result_count = count($query_result->posts);
+
+  return $query_result_count == 0 ?
+    (object) array() : _formatProduct($query_result->post);
+}
+
+function product_routes() {
+  register_rest_route(ENDPOINT_V1, '/product', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'searchProduct',
     'args' => array(
@@ -85,5 +100,13 @@ function add_product_api() {
         'type' => 'string',
       )
     )
+  ));
+
+  register_rest_route(ENDPOINT_V1, '/product/(?P<pid>\d+)', array(
+    'method' => WP_REST_Server::READABLE,
+    'callback' => 'getProductById',
+    'args' => array(
+      'pid' => array('validate_callback' => 'is_numeric')
+    ),
   ));
 }
