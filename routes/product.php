@@ -93,7 +93,7 @@ function product_routes() {
         'sanitize_callback' => 'absint',
       ),
       'limit' => array(
-        'default' => 10,
+        'default' => 12,
         'type' => 'integer',
         'sanitize_callback' => 'absint',
       ),
