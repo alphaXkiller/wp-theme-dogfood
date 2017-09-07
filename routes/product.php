@@ -26,6 +26,14 @@ function searchProduct($request) {
     'offset' => ( $request['page'] - 1 ) * $request['limit'],
   );
 
+  $request['featured'] == 1 ? $args['tax_query'] = array(
+    array(
+        'taxonomy' => 'product_visibility',
+        'field'    => 'name',
+        'terms'    => 'featured',
+    )
+  ) : null;
+
   add_filter( 'posts_search', 'search_by_title', 20, 2 );
   $query = new WP_Query($args);
   $products = array_map('_formatProduct', $query->posts);
@@ -101,6 +109,10 @@ function product_routes() {
       'starts_with' => array(
         'default' => '',
         'type' => 'string',
+      ),
+      'featured' => array(
+        'default' => 0,
+        'type' => 'integer',
       )
     )
   ));
