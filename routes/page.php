@@ -36,5 +36,4 @@ function registerPageRoutes() {
   ));
 }
 
-  add_action('rest_api_init', 'registerPageRoutes');
 ?>

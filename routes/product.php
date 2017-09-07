@@ -13,6 +13,7 @@ function _formatProduct($raw_product) {
     'featured' => $product->is_featured(),
     'category' => get_the_terms($raw_product->ID, 'product_cat'),
     'variations' => $product->get_available_variations(),
+    'slug' => $product->get_slug(),
   ];
 }
 
@@ -68,11 +69,11 @@ function search_by_title($search, $wp_query){
 
 }
 
-function getProductById($request) {
+function getProductBySlug($request) {
   $args = array(
     'post_type' => 'product',
     'status' => 'publish',
-    'p' => $request['pid'],
+    'name' => $request['slug'],
   );
 
   $query_result = new WP_Query($args);
@@ -104,11 +105,8 @@ function product_routes() {
     )
   ));
 
-  register_rest_route(ENDPOINT_V1, '/product/(?P<pid>\d+)', array(
+  register_rest_route(ENDPOINT_V1, '/product/(?P<slug>[a-zA-Z0-9-]+)', array(
     'method' => WP_REST_Server::READABLE,
-    'callback' => 'getProductById',
-    'args' => array(
-      'pid' => array('validate_callback' => 'is_numeric')
-    ),
+    'callback' => 'getProductBySlug',
   ));
 }
