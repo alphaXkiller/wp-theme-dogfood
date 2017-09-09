@@ -15,6 +15,7 @@ function _formatProduct($raw_product) {
     'variations'        => $product->get_available_variations(),
     'slug'              => $product->get_slug(),
     'extra_fields'      => get_field('extra_fields', $raw_product->ID),
+  ];
 }
 
 function searchProduct($request) {
