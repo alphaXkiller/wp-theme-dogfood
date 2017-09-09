@@ -9,11 +9,12 @@ function _formatProduct($raw_product) {
     'status'            => $product->get_status(),
     'description'       => $product->get_description(),
     'short_description' => $product->get_short_description(),
-    'image' => get_the_post_thumbnail_url($raw_product->ID),
-    'featured' => $product->is_featured(),
-    'category' => get_the_terms($raw_product->ID, 'product_cat'),
-    'variations' => $product->get_available_variations(),
-    'slug' => $product->get_slug(),
+    'image'             => get_the_post_thumbnail_url($raw_product->ID),
+    'featured'          => $product->is_featured(),
+    'category'          => get_the_terms($raw_product->ID, 'product_cat'),
+    'variations'        => $product->get_available_variations(),
+    'slug'              => $product->get_slug(),
+    'extra_fields'      => get_field('extra_fields', $raw_product->ID),
 }
 
 function searchProduct($request) {
