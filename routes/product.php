@@ -4,15 +4,16 @@ function _formatProduct($raw_product) {
   $product = new WC_Product_Variable($raw_product);
 
   return (object) [
-    'ID' => $raw_product->ID,
-    'name' => $product->get_name(),
-    'status' => $product->get_status(),
-    'description' => $product->get_description(),
+    'ID'                => $raw_product->ID,
+    'name'              => $product->get_name(),
+    'status'            => $product->get_status(),
+    'description'       => $product->get_description(),
     'short_description' => $product->get_short_description(),
-    'image' => get_the_post_thumbnail_url($raw_product->ID),
-    'featured' => $product->is_featured(),
-    'category' => get_the_terms($raw_product->ID, 'product_cat'),
-    'variations' => $product->get_available_variations(),
+    'image'             => get_the_post_thumbnail_url($raw_product->ID),
+    'featured'          => $product->is_featured(),
+    'category'          => get_the_terms($raw_product->ID, 'product_cat'),
+    'variations'        => $product->get_available_variations(),
+    'extra_fields'      => get_field('extra_fields', $raw_product->ID),
   ];
 }
 
