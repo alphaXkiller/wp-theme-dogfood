@@ -9,12 +9,11 @@ function _formatProduct($raw_product) {
     'status'            => $product->get_status(),
     'description'       => $product->get_description(),
     'short_description' => $product->get_short_description(),
-    'image'             => get_the_post_thumbnail_url($raw_product->ID),
-    'featured'          => $product->is_featured(),
-    'category'          => get_the_terms($raw_product->ID, 'product_cat'),
-    'variations'        => $product->get_available_variations(),
-    'extra_fields'      => get_field('extra_fields', $raw_product->ID),
-  ];
+    'image' => get_the_post_thumbnail_url($raw_product->ID),
+    'featured' => $product->is_featured(),
+    'category' => get_the_terms($raw_product->ID, 'product_cat'),
+    'variations' => $product->get_available_variations(),
+    'slug' => $product->get_slug(),
 }
 
 function searchProduct($request) {
@@ -25,6 +24,14 @@ function searchProduct($request) {
     'posts_per_page' => $request['limit'],
     'offset' => ( $request['page'] - 1 ) * $request['limit'],
   );
+
+  $request['featured'] == 1 ? $args['tax_query'] = array(
+    array(
+        'taxonomy' => 'product_visibility',
+        'field'    => 'name',
+        'terms'    => 'featured',
+    )
+  ) : null;
 
   add_filter( 'posts_search', 'search_by_title', 20, 2 );
   $query = new WP_Query($args);
@@ -69,11 +76,11 @@ function search_by_title($search, $wp_query){
 
 }
 
-function getProductById($request) {
+function getProductBySlug($request) {
   $args = array(
     'post_type' => 'product',
     'status' => 'publish',
-    'p' => $request['pid'],
+    'name' => $request['slug'],
   );
 
   $query_result = new WP_Query($args);
@@ -101,15 +108,16 @@ function product_routes() {
       'starts_with' => array(
         'default' => '',
         'type' => 'string',
+      ),
+      'featured' => array(
+        'default' => 0,
+        'type' => 'integer',
       )
     )
   ));
 
-  register_rest_route(ENDPOINT_V1, '/product/(?P<pid>\d+)', array(
+  register_rest_route(ENDPOINT_V1, '/product/(?P<slug>[a-zA-Z0-9-]+)', array(
     'method' => WP_REST_Server::READABLE,
-    'callback' => 'getProductById',
-    'args' => array(
-      'pid' => array('validate_callback' => 'is_numeric')
-    ),
+    'callback' => 'getProductBySlug',
   ));
 }
