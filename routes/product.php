@@ -84,6 +84,14 @@ function searchProduct($request) {
     'cat' => $request['cat'],
     'featured' => $request['featured'],
   ));
+  $meta_query = is_null($request['brand']) ? null : array(
+    array(
+      'key' => 'brand',
+      'compare' => 'IN',
+      'value' => explode(',', $request['brand']),
+    )
+  );
+
   $args = array(
     'post_type' => 'product',
     's' => $request['starts_with'],
@@ -91,6 +99,7 @@ function searchProduct($request) {
     'posts_per_page' => $request['limit'],
     'offset' => ( $request['page'] - 1 ) * $request['limit'],
     'tax_query' => $tax_query,
+    'meta_query' => $meta_query
   );
 
   add_filter( 'posts_search', 'search_by_title', 20, 2 );
@@ -143,6 +152,9 @@ function product_routes() {
         'type' => 'integer',
       ),
       'cat' => array(
+        'type' => 'string',
+      ),
+      'brand' => array(
         'type' => 'string',
       )
     )

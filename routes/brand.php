@@ -1,7 +1,7 @@
 <?php
 
 function getBrands() {
-  $brands = get_field_object('field_59bf367928320');
+  $brands = get_field_object('field_59dfbe8c3786e');
 
   return $brands;
 }
