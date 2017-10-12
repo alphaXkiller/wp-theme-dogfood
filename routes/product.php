@@ -19,36 +19,6 @@ function _formatProduct($raw_product) {
   ];
 }
 
-function searchProduct($request) {
-  $args = array(
-    'post_type' => 'product',
-    's' => $request['starts_with'],
-    'status' => 'publish',
-    'posts_per_page' => $request['limit'],
-    'offset' => ( $request['page'] - 1 ) * $request['limit'],
-  );
-
-  $request['featured'] == 1 ? $args['tax_query'] = array(
-    array(
-        'taxonomy' => 'product_visibility',
-        'field'    => 'name',
-        'terms'    => 'featured',
-    )
-  ) : null;
-
-  add_filter( 'posts_search', 'search_by_title', 20, 2 );
-  $query = new WP_Query($args);
-  $products = array_map('_formatProduct', $query->posts);
-
-  $result = (object) [
-    'query' => $request->get_query_params(),
-    'count' => $query->found_posts,
-    'rows'  => $products,
-  ];
-
-  return $result;
-}
-
 function search_by_title($search, $wp_query){
 
     global $wpdb;
@@ -77,6 +47,63 @@ function search_by_title($search, $wp_query){
 
     return $search;
 
+}
+
+// @param array('cat' => string, 'featured' => int)
+//
+// @return tax_query array map
+function _getSearchProductTaxQuery($request) {
+  $query_count = count(array_filter($request, function($val, $key) {
+    return $val != null;
+  }, ARRAY_FILTER_USE_BOTH));
+
+  if ($query_count == 0)
+    return null;
+
+  $tax_query = $query_count > 1 ? array('relation' => 'AND') : array();
+
+  if ($request['featured'] == 1)
+    array_push($tax_query, array(
+      'taxonomy' => 'product_visibility',
+      'field'    => 'name',
+      'terms'    => 'featured',
+    ));
+
+  if ($request['cat'])
+    array_push($tax_query, array(
+      'taxonomy' => 'product_cat',
+      'field' => 'slug',
+      'terms' => explode(',', $request['cat']),
+    ));
+
+  return $tax_query;
+}
+
+function searchProduct($request) {
+  $tax_query = _getSearchProductTaxQuery(array(
+    'cat' => $request['cat'],
+    'featured' => $request['featured'],
+  ));
+  $args = array(
+    'post_type' => 'product',
+    's' => $request['starts_with'],
+    'status' => 'publish',
+    'posts_per_page' => $request['limit'],
+    'offset' => ( $request['page'] - 1 ) * $request['limit'],
+    'tax_query' => $tax_query,
+  );
+
+  add_filter( 'posts_search', 'search_by_title', 20, 2 );
+  $query = new WP_Query($args);
+  $products = array_map('_formatProduct', $query->posts);
+
+  $result = (object) [
+    'query' => $request->get_query_params(),
+    'count' => $query->found_posts,
+    'rows'  => $products,
+  ];
+
+  return $result;
 }
 
 function getProductBySlug($request) {
@@ -113,8 +140,10 @@ function product_routes() {
         'type' => 'string',
       ),
       'featured' => array(
-        'default' => 0,
         'type' => 'integer',
+      ),
+      'cat' => array(
+        'type' => 'string',
       )
     )
   ));

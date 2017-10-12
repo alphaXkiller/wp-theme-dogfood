@@ -20,11 +20,6 @@ function getAllCategory() {
   );
 
   $categories = get_categories($args);
-  $brands = get_field_object('field_59bf367928320');
-
-  if ($brands) {
-    array_push($categories, $brands);
-  }
 
   return $categories;
 }
