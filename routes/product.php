@@ -5,10 +5,10 @@ function _formatProduct($raw_product) {
   $extra_fields = get_field('extra_fields', $raw_product->ID);
 
   return (object) [
-    'ID' => $raw_product->ID,
-    'name' => $product->get_name(),
-    'status' => $product->get_status(),
-    'description' => $product->get_description(),
+    'ID'                => $raw_product->ID,
+    'name'              => $product->get_name(),
+    'status'            => $product->get_status(),
+    'description'       => $product->get_description(),
     'short_description' => $product->get_short_description(),
     'image' => get_the_post_thumbnail_url($raw_product->ID),
     'featured' => $product->is_featured(),
