@@ -2,7 +2,6 @@
 
 function _formatProduct($raw_product) {
   $product = new WC_Product_Variable($raw_product);
-  $extra_fields = get_field('extra_fields', $raw_product->ID);
 
   return (object) [
     'ID'                => $raw_product->ID,
@@ -15,7 +14,9 @@ function _formatProduct($raw_product) {
     'category' => get_the_terms($raw_product->ID, 'product_cat'),
     'variations' => $product->get_available_variations(),
     'slug' => $product->get_slug(),
-    'extra_fields' => $extra_fields,
+    'brand' => get_field('brand', $raw_product->ID),
+    'nutritional_info' => get_field('nutritional_info', $raw_product->ID),
+    'feeding_instructions' => get_field('feeding_instructions', $raw_product->ID)
   ];
 }
 
