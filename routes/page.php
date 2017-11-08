@@ -8,6 +8,7 @@ function _format_page_obj($raw_post) {
       'content'        => apply_filters('the_content', $raw_post->post_content),
       'slug'           => $raw_post->post_name,
       'featured_image' => get_the_post_thumbnail_url($post_id),
+      'hero_content'   => get_field("hero_content"),
     ];
     return $page;
 }
