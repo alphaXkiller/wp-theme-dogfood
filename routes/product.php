@@ -30,7 +30,7 @@ function _formatProduct($raw_product) {
   return (object) [
     'ID'                      => $raw_product->ID,
     'name'                    => $product->get_name(),
-    'meta'                    => get_yoast_products($post_id),
+    'meta'                    => get_yoast_products($raw_product->ID),
     'status'                  => $product->get_status(),
     'description'             => $product->get_description(),
     'short_description'       => $product->get_short_description(),
