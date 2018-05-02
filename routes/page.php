@@ -1,6 +1,7 @@
 <?php
 
 function _format_page_obj($raw_post) {
+    WPBMap::addAllMappedShortcodes();
     $post_id = $raw_post->ID;
 
     function get_yoast_pages($post_id){
